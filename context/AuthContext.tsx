@@ -1,39 +1,60 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
 
-type User = {
-  id: string;
-  name: string;
-  role: 'dipendente' | 'direzione';
-};
+import { saveUserToFirestore } from '../services/userService'; // 👈 qui
 
-type AuthContextType = {
-  user: User | null;
-  login: (userData: User) => void;
-  logout: () => void;
-};
+const AuthContext = createContext({
+  user: null,
+  login: async (email: string, password: string) => {},
+  register: async ({ email, password, nome, ruolo }: { email: string; password: string; nome: string; ruolo: string }) => {},
+  logout: () => {},
+});
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (usr) => {
+      setUser(usr);
+    });
+    return unsubscribe;
+  }, []);
 
-  const login = (userData: User) => {
-    setUser(userData);
+  const login = async (email, password) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      alert('Errore login: ' + err.message);
+    }
+  };
+
+  const register = async ({ email, password, nome, ruolo }) => {
+    try {
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);
+  
+      // 👇 Salva anche su Firestore nella collezione 'utenti'
+      await saveUserToFirestore(userCred.user.uid, {
+        nome,
+        ruolo,
+        email,
+        createdAt: new Date().toISOString()
+      });
+  
+    } catch (err) {
+      alert('Errore registrazione: ' + err.message);
+    }
   };
 
   const logout = () => {
-    setUser(null);
+    signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);

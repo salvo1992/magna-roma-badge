@@ -1,53 +1,28 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity,Button, StyleSheet } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import colors from '../assets/colors';
 import { useNavigation } from '@react-navigation/native';
 
+
 const LoginScreen = () => {
   const { login } = useAuth();
   const navigation = useNavigation();
-  const [name, setName] = useState('');
-  const [role, setRole] = useState<'dipendente' | 'direzione'>('dipendente');
 
-  const handleLogin = () => {
-    if (name.trim() !== '') {
-      login({ id: Date.now().toString(), name, role });
-    }
-  };
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+ 
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login Magna Roma</Text>
 
-      <TextInput
-        placeholder="Nome"
-        placeholderTextColor="#ccc"
-        value={name}
-        onChangeText={setName}
-        style={styles.input}
-      />
-
-      <TouchableOpacity
-        style={[styles.button, role === 'dipendente' && styles.selected]}
-        onPress={() => setRole('dipendente')}
-      >
-        <Text style={styles.buttonText}>Dipendente</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.button, role === 'direzione' && styles.selected]}
-        onPress={() => setRole('direzione')}
-      >
-        <Text style={styles.buttonText}>Direzione</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.loginText}>Accedi</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-        <Text style={styles.link}>Non hai un account? Registrati</Text>
+      <TextInput style={styles.input} placeholder="Email" onChangeText={setEmail} />
+      <TextInput style={styles.input} placeholder="Password" onChangeText={setPassword} secureTextEntry />
+      <Button title="Accedi" onPress={() => login(email, password)} />
+      <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.registerLink}>
+        <Text style={styles.registerText}>Non hai un account? Registrati</Text>
       </TouchableOpacity>
     </View>
   );
@@ -91,6 +66,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#fff',
     textDecorationLine: 'underline',
+  },
+  registerButton: {
+    marginTop: 15,
+    padding: 10,
+    backgroundColor: colors.romaDark,
+    borderRadius: 8,
+  },
+  
+  registerText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  registerLink: {
+    marginTop: 15,
   },
 });
 

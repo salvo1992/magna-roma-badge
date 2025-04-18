@@ -6,6 +6,7 @@ export type AttendanceRecord = {
   id: string;
   type: 'entrata' | 'uscita';
   timestamp: string;
+  durataOre?: string; // Solo per uscita
 };
 
 export const saveAttendance = async (record: AttendanceRecord) => {
@@ -29,3 +30,10 @@ export const getAttendance = async (): Promise<AttendanceRecord[]> => {
     return [];
   }
 };
+
+export const getLastAttendanceById = async (id: string): Promise<AttendanceRecord | null> => {
+    const data = await getAttendance();
+    const userRecords = data.filter(r => r.id === id);
+    return userRecords.length ? userRecords[userRecords.length - 1] : null;
+  };
+  

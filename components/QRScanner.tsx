@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Alert, StyleSheet, Pressable } from 'react-native';
 import { CameraView, useCameraPermissions, BarcodeScanningResult } from 'expo-camera';
 import colors from '../assets/colors';
-import { saveAttendance } from '../storage/attendanceStorage'; // Adjust the import path as needed
+import { saveAttendance, getLastAttendanceById } from '../storage/attendanceStorage'; // aggiungeremo questa nuova funzione
+import { syncToFirebase } from '../services/syncService';
 
 export default function QRScanner() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -26,21 +27,33 @@ export default function QRScanner() {
   const handleBarcodeScanned = async (result: BarcodeScanningResult) => {
     if (!scanned && result?.data) { // Assuming 'data' is the correct property
       setScanned(true);
-
-      const newRecord = {
-        id: result.data, // Assuming the QR code contains a unique ID
-        type: 'entrata' as 'entrata' | 'uscita', // o 'uscita', puoi cambiarlo dinamicamente più avanti
-        timestamp: new Date().toISOString()
-      };
+      const id = result.data; // Assuming the QR code contains the ID directly
+      const now = new Date().toISOString();
   
-      await saveAttendance(newRecord);
-
-      Alert.alert('Badge Scansionato', `ID: ${result.data}`, [
-        { text: 'OK', onPress: () => setScanned(false) }
-      ]);
+      const last = await getLastAttendanceById(id);
+  
+      if (!last || last.type === 'uscita') {
+        // Nuova entrata
+        await saveAttendance({ id, type: 'entrata', timestamp: now });
+        Alert.alert('Ingresso registrato', `Benvenuto! Orario: ${new Date(now).toLocaleTimeString('it-IT')}`);
+      } else {
+        // È un’uscita → calcolo ore
+        const ingresso = new Date(last.timestamp);
+        const uscita = new Date(now);
+        const diffMs = uscita.getTime() - ingresso.getTime();
+        const diffOre = (diffMs / 3600000).toFixed(2);
+  
+        await saveAttendance({ id, type: 'uscita', timestamp: now, durataOre: diffOre });
+  
+        Alert.alert('Uscita registrata', `Hai lavorato ${diffOre} ore. A presto!`);
+      }
+  
+      setTimeout(() => setScanned(false), 2000);
     }
   };
-
+  useEffect(() => {
+    syncToFirebase();
+  }, []);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Scannerizza il badge</Text>

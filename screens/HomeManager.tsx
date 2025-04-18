@@ -3,7 +3,8 @@ import { View, Text, StyleSheet } from 'react-native';
 import Clock from '../components/Clock';
 import colors from '../assets/colors';
 import QRScanner from '../components/QRScanner';
-import { useAuth } from '../context/AuthContext';
+import { Button } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const HomeManager = () => {
   return (
@@ -11,6 +12,8 @@ const HomeManager = () => {
       <Clock />
       <Text style={styles.title}>Dashboard Direzione - Magna Roma</Text>
       <QRScanner />
+      <Button title="Esporta PDF" onPress={() => navigation.navigate('ExportPDF')} />
+
       <Text style={styles.footer}>sviluppata dal vikingo del web</Text>
     </View>
   );
