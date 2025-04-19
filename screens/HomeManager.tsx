@@ -12,7 +12,7 @@ export default function HomeManager() {
     <View style={styles.container}>
       <AppHeaderLogo />
       <Text style={styles.title}>Dashboard Direzione</Text>
-      <Text style={styles.subtitle}>Benvenuto Direttore</Text>
+      <Text style={styles.subtitle}>Benvenuto nella dashboard direzione</Text>
 
       <Button title="📅 Calendario Presenze" onPress={() => navigation.navigate('Calendar')} color={colors.romaGold} />
       <Button title="📊 Storico & PDF" onPress={() => navigation.navigate('ExportPDF')} color={colors.romaGold} />

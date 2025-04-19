@@ -7,7 +7,9 @@ import DashboardDirezioneScreen from '../screens/DashboardDirezioneScreen';
 import TabletScannerScreen from '../screens/TabletScannerScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-
+import CalendarScreen from '../screens/CalendarScreen';
+import PresenzeLiveScreen from '../screens/PresenzeLiveScreen';
+import PresenceDashboardScreen from '../screens/PresenceDashboardScreen';
 const Stack = createNativeStackNavigator();
 
 export default function ManagerNavigator() {
@@ -20,6 +22,9 @@ export default function ManagerNavigator() {
       <Stack.Screen name="ScannerTablet" component={TabletScannerScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="Calendar" component={CalendarScreen} />
+      <Stack.Screen name="PresenzeLive" component={PresenzeLiveScreen} />
+      <Stack.Screen name="PresenceDashboard" component={PresenceDashboardScreen} />
     </Stack.Navigator>
   );
 }

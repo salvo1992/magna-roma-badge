@@ -9,10 +9,10 @@ export default function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <View style={styles.container}>
-          <AppNavigator /> {/* ← NavigationContainer sta già DENTRO QUI */}
-          <StatusBar style="light" />
-        </View>
+        
+          <AppNavigator /> 
+          
+        
       </AuthProvider>
     </LanguageProvider>
   );

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// ✅ LoginScreen.tsx
+import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -11,6 +12,8 @@ export default function LoginScreen() {
   const navigation = useNavigation<any>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showKeyInput, setShowKeyInput] = useState(false);
+  const [key, setKey] = useState('');
 
   const handleBiometricLogin = async () => {
     const success = await authenticateBiometric();
@@ -24,6 +27,10 @@ export default function LoginScreen() {
     } else {
       Alert.alert('Errore', 'Autenticazione biometrica fallita.');
     }
+  };
+
+  const handleLogin = () => {
+    login(email, password, showKeyInput ? key : undefined);
   };
 
   return (
@@ -47,11 +54,26 @@ export default function LoginScreen() {
         value={password}
       />
 
-      <Button title="Accedi" onPress={() => login(email, password)} color={colors.romaGold} />
+      {showKeyInput && (
+        <TextInput
+          style={styles.input}
+          placeholder="Chiave Direzione"
+          keyboardType="numeric"
+          maxLength={10}
+          onChangeText={setKey}
+          value={key}
+        />
+      )}
+
+      <Button title="Accedi" onPress={handleLogin} color={colors.romaGold} />
 
       <View style={{ marginVertical: 10 }}>
         <Button title="Accedi con impronta" onPress={handleBiometricLogin} color="#555" />
       </View>
+
+      <TouchableOpacity onPress={() => setShowKeyInput(!showKeyInput)}>
+        <Text style={styles.registerText}>{showKeyInput ? '🔒 Nascondi campo Direzione' : '🔑 Accesso Direzione'}</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.registerLink}>
         <Text style={styles.registerText}>Non hai un account? Registrati</Text>
@@ -87,5 +109,8 @@ const styles = StyleSheet.create({
   registerText: {
     color: '#fff',
     textDecorationLine: 'underline',
+    textAlign: 'center',
+    marginTop: 10
   },
 });
+

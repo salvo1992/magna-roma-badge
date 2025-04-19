@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Alert } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import AppHeaderLogo from '../components/AppHeaderLogo';
 
 export default function TabletScannerScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -12,7 +13,7 @@ export default function TabletScannerScreen() {
     requestPermission();
   }, []);
 
-  const handleScanned = ({ data }) => {
+  const handleScanned = ({ data }: { data: string }) => {
     if (!scanned) {
       setScanned(true);
       Alert.alert('Scansione completata', data);
@@ -23,6 +24,7 @@ export default function TabletScannerScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      <AppHeaderLogo />
       {permission?.granted && (
         <CameraView
           facing="front"

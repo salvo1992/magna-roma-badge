@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
@@ -7,6 +7,9 @@ import RegisterScreen from '../screens/RegisterScreen';
 import EmployeeNavigator from './EmployeeNavigator';
 import ManagerNavigator from './ManagerNavigator';
 import { syncTimbratureToFirestore } from '../storage/syncWithFirestore';
+import { getUserDataFromFirestore } from '../services/userService';
+
+const DIREZIONE_KEY = '1234567890'; // Chiave fissa per identificare la direzione
 
 type RootStackParamList = {
   Login: undefined;
@@ -24,22 +27,34 @@ const AuthStack = () => (
 
 const AppNavigator: React.FC = () => {
   const { user } = useAuth();
+  const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
     syncTimbratureToFirestore();
   }, []);
 
-  return (
-    <NavigationContainer>
-      {!user ? (
-        <AuthStack />
-      ) : user.role === 'dipendente' ? (
-        <EmployeeNavigator />
-      ) : (
-        <ManagerNavigator />
-      )}
-    </NavigationContainer>
-  );
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user) {
+        const data = await getUserDataFromFirestore(user.uid);
+        setUserData(data);
+      }
+    };
+    fetchUserData();
+  }, [user]);
+
+  const renderNavigator = () => {
+    if (!user) return <AuthStack />;
+
+    // Se ha la chiave direzione o ruolo è "direzione"
+    if (userData?.isDirezione === true || userData?.ruolo === 'direzione') {
+      return <ManagerNavigator />;
+    }
+
+    return <EmployeeNavigator />;
+  };
+
+  return <NavigationContainer>{renderNavigator()}</NavigationContainer>;
 };
 
 export default AppNavigator;

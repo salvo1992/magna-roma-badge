@@ -13,12 +13,12 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     alignItems: 'center',
-    paddingTop: 40,
-    paddingBottom: 10,
-    backgroundColor: '#fff',
+    paddingTop: 60,
+    paddingBottom: 60,
+    backgroundColor: 'transparent',
   },
   logo: {
-    width: 120,
+    width: 200,
     height: 40,
   },
 });

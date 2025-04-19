@@ -1,3 +1,4 @@
+// ✅ AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   getAuth,
@@ -8,24 +9,28 @@ import {
   User,
 } from 'firebase/auth';
 import { app } from '../firebaseConfig';
-import { saveUserToFirestore } from '../services/userService';
+import { saveUserToFirestore, getUserRoleFromFirestore } from '../services/userService';
+import { saveLoginCredentials } from '../services/biometricAuth';
 
 const auth = getAuth(app);
 
-type AuthContextType = {
+interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  userRole: string | null;
+  login: (email: string, password: string, key?: string) => Promise<void>;
   register: (data: {
     email: string;
     password: string;
     nome: string;
     ruolo: string;
+    isDirezione?: boolean;//nuovo
   }) => Promise<void>;
   logout: () => void;
-};
+}
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  userRole: null,
   login: async () => {},
   register: async () => {},
   logout: () => {},
@@ -33,17 +38,31 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (usr) => {
+    const unsubscribe = onAuthStateChanged(auth, async (usr) => {
       setUser(usr);
+      if (usr) {
+        const ruolo = await getUserRoleFromFirestore(usr.uid);
+        setUserRole(ruolo);
+      } else {
+        setUserRole(null);
+      }
     });
     return unsubscribe;
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, key = '') => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      const ruolo = await getUserRoleFromFirestore(result.user.uid);
+
+      if (ruolo === 'direzione' && key !== '1234567890') {
+        throw new Error('Chiave direzione non valida');
+      }
+
+      await saveLoginCredentials(email, password);
     } catch (err: any) {
       alert('Errore login: ' + err.message);
     }
@@ -70,10 +89,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => {
     signOut(auth);
+    setUserRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, userRole, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

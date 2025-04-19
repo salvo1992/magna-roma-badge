@@ -3,6 +3,7 @@ import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { getAttendance, AttendanceRecord } from '../storage/attendanceStorage';
 import colors from '../assets/colors';
 import AppHeaderLogo from '../components/AppHeaderLogo';
+;
 
 const HistoryScreen = () => {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
@@ -34,6 +35,8 @@ const HistoryScreen = () => {
 
   return (
     <View style={styles.container}>
+      <AppHeaderLogo />
+      <Text style={styles.title}>Benvenuto</Text>
       <Text style={styles.title}>Storico Timbrature</Text>
       <FlatList
         data={records}
