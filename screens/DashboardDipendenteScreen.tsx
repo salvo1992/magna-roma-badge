@@ -4,15 +4,21 @@ import Clock from '../components/Clock';
 import BadgeCard from '../components/BadgeCard';
 import { useAuth } from '../context/AuthContext';
 import colors from '../assets/colors';
+import AppHeaderLogo from '../components/AppHeaderLogo';
 
 export default function DashboardDipendenteScreen() {
   const { user } = useAuth();
 
   return (
     <View style={styles.container}>
+      <AppHeaderLogo />
       <Clock />
-      <Text style={styles.title}>Ciao {user?.name} 👋</Text>
-      <BadgeCard name={user?.name} reparto={user?.role} id={user?.id} />
+      <Text style={styles.title}>Ciao {user?.nome || 'Dipendente'} 👋</Text>
+      <BadgeCard
+        name={user?.nome || 'Nome'}
+        reparto={user?.ruolo || 'Reparto'}
+        id={user?.uid || 'ID'}
+      />
       <Text style={styles.footer}>sviluppata dal vikingo del web</Text>
     </View>
   );

@@ -1,87 +1,91 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity,Button, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import colors from '../assets/colors';
-import { useNavigation } from '@react-navigation/native';
+import { authenticateBiometric, getSavedCredentials } from '../services/biometricAuth';
+import AppHeaderLogo from '../components/AppHeaderLogo';
 
-
-const LoginScreen = () => {
+export default function LoginScreen() {
   const { login } = useAuth();
-  const navigation = useNavigation();
-
+  const navigation = useNavigation<any>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
- 
+  const handleBiometricLogin = async () => {
+    const success = await authenticateBiometric();
+    if (success) {
+      const creds = await getSavedCredentials();
+      if (creds.email && creds.password) {
+        login(creds.email, creds.password);
+      } else {
+        Alert.alert('Errore', 'Credenziali non trovate. Accedi manualmente una volta.');
+      }
+    } else {
+      Alert.alert('Errore', 'Autenticazione biometrica fallita.');
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login Magna Roma</Text>
+      <AppHeaderLogo />
+      <Text style={styles.title}>Benvenuto</Text>
+      <Text style={styles.title}>Login</Text>
 
-      <TextInput style={styles.input} placeholder="Email" onChangeText={setEmail} />
-      <TextInput style={styles.input} placeholder="Password" onChangeText={setPassword} secureTextEntry />
-      <Button title="Accedi" onPress={() => login(email, password)} />
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        onChangeText={setEmail}
+        value={email}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry
+        onChangeText={setPassword}
+        value={password}
+      />
+
+      <Button title="Accedi" onPress={() => login(email, password)} color={colors.romaGold} />
+
+      <View style={{ marginVertical: 10 }}>
+        <Button title="Accedi con impronta" onPress={handleBiometricLogin} color="#555" />
+      </View>
+
       <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.registerLink}>
         <Text style={styles.registerText}>Non hai un account? Registrati</Text>
       </TouchableOpacity>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.romaRed, padding: 20, justifyContent: 'center' },
-  title: { fontSize: 28, fontWeight: 'bold', color: colors.romaGold, textAlign: 'center', marginBottom: 40 },
+  container: {
+    flex: 1,
+    backgroundColor: colors.romaRed,
+    padding: 20,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: colors.romaGold,
+    textAlign: 'center',
+    marginBottom: 30,
+  },
   input: {
     backgroundColor: '#fff',
     borderRadius: 8,
     padding: 10,
     marginBottom: 15,
   },
-  button: {
-    backgroundColor: colors.romaDark,
-    padding: 10,
-    borderRadius: 8,
-    marginVertical: 5,
-  },
-  selected: {
-    backgroundColor: colors.romaOrange,
-  },
-  buttonText: {
-    color: '#fff',
-    textAlign: 'center',
-  },
-  loginButton: {
-    backgroundColor: colors.romaGold,
-    padding: 15,
-    borderRadius: 8,
+  registerLink: {
     marginTop: 20,
+    alignItems: 'center',
   },
-  loginText: {
-    color: colors.romaRed,
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  link: {
-    marginTop: 15,
-    textAlign: 'center',
+  registerText: {
     color: '#fff',
     textDecorationLine: 'underline',
   },
-  registerButton: {
-    marginTop: 15,
-    padding: 10,
-    backgroundColor: colors.romaDark,
-    borderRadius: 8,
-  },
-  
-  registerText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  registerLink: {
-    marginTop: 15,
-  },
 });
-
-export default LoginScreen;

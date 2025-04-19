@@ -1,50 +1,43 @@
-import BadgeCard from '../components/BadgeCard';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Clock from '../components/Clock';
+import { View, Text, StyleSheet, Button } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import colors from '../assets/colors';
-import { useAuth } from '../context/AuthContext';
+import AppHeaderLogo from '../components/AppHeaderLogo';
 
-const HomeEmployee = () => {
-  const { user } = useAuth();
+export default function HomeEmployee() {
+  const navigation = useNavigation<any>();
+
 
   return (
     <View style={styles.container}>
-      <Clock />
-      <Text style={styles.title}>Benvenuto da Magna Roma</Text>
-      {user && (
-        <BadgeCard
-          name={user.name}
-          reparto="Cucina" // Può essere dinamico in futuro
-          id={user.id}
-        />
-      )}
-      <Text style={styles.footer}>sviluppata dal vikingo del web</Text>
+      <AppHeaderLogo />
+      <Text style={styles.title}>Benvenuto Dipendente</Text>
+      <Text style={styles.subtitle}>Visualizza i tuoi dati personali e presenze</Text>
+      <Button title="🎫 Il mio Badge" onPress={() => navigation.navigate('Badge')} color={colors.romaGold} />
+      <Button title="📅 Calendario Presenze" onPress={() => navigation.navigate('Calendar')} color={colors.romaGold} />
+      <Button title="🔔 Notifiche" onPress={() => navigation.navigate('Notifications')} color={colors.romaGold} />
+      <Button title="📷 Scannerizza il tuo Badge" onPress={() => navigation.navigate('QRScanner')} color={colors.romaGold} />
+      <Button title="⚙️ Impostazioni" onPress={() => navigation.navigate('Settings')} color={colors.romaGold} />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.romaRed,
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
-    justifyContent: 'flex-start',
   },
   title: {
+    fontSize: 26,
     color: colors.romaGold,
-    fontSize: 24,
-    textAlign: 'center',
-    marginVertical: 20,
+    marginBottom: 10,
   },
-  footer: {
-    position: 'absolute',
-    bottom: 10,
-    width: '100%',
-    textAlign: 'center',
-    color: '#ccc',
-    fontSize: 12,
+  subtitle: {
+    fontSize: 18,
+    color: '#fff',
+    marginBottom: 30,
   },
 });
-
-export default HomeEmployee;

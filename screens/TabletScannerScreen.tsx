@@ -1,57 +1,39 @@
-// ✅ 1. TabletScannerScreen.tsx
-import { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import QRScanner from '../components/QRScanner';
-import colors from '../assets/colors';
+// ✅ 2. Fotocamera frontale automatica (per Tablet Scanner)
+// screens/TabletScannerScreen.tsx (semplificato)
+import React, { useEffect, useState } from 'react';
+import { View, Alert } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 
 export default function TabletScannerScreen() {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [permission, requestPermission] = useCameraPermissions();
+  const [scanned, setScanned] = useState(false);
 
-  const handleLogin = () => {
-    if (email === 'direzione@magna.it' && password === '1234') {
-      setAuthenticated(true);
-    } else {
-      alert('Credenziali non valide');
+  useEffect(() => {
+    requestPermission();
+  }, []);
+
+  const handleScanned = ({ data }) => {
+    if (!scanned) {
+      setScanned(true);
+      Alert.alert('Scansione completata', data);
+      // gestione timbratura qui
+      setTimeout(() => setScanned(false), 2000);
     }
   };
 
-  if (!authenticated) {
-    return (
-      <View style={styles.loginContainer}>
-        <Text style={styles.title}>Accesso Direzione</Text>
-        <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={styles.input} />
-        <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
-        <Button title="Accedi" onPress={handleLogin} />
-      </View>
-    );
-  }
-
-  return <QRScanner />;
+  return (
+    <View style={{ flex: 1 }}>
+      {permission?.granted && (
+        <CameraView
+          facing="front"
+          onBarcodeScanned={handleScanned}
+          barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+          style={{ flex: 1 }}
+        />
+      )}
+    </View>
+  );
 }
-
-const styles = StyleSheet.create({
-  loginContainer: {
-    flex: 1,
-    backgroundColor: colors.romaRed,
-    justifyContent: 'center',
-    padding: 20
-  },
-  title: {
-    fontSize: 24,
-    color: colors.romaGold,
-    textAlign: 'center',
-    marginBottom: 20
-  },
-  input: {
-    borderWidth: 1,
-    backgroundColor: '#fff',
-    padding: 10,
-    marginBottom: 10
-  }
-});
-
 
 
 

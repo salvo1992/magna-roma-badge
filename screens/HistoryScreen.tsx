@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { getAttendance, AttendanceRecord } from '../storage/attendanceStorage';
 import colors from '../assets/colors';
+import AppHeaderLogo from '../components/AppHeaderLogo';
 
 const HistoryScreen = () => {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
@@ -21,6 +22,7 @@ const HistoryScreen = () => {
 
     return (
       <View style={styles.card}>
+        <AppHeaderLogo />
         <Text style={styles.id}>ID: {item.id}</Text>
         <Text style={styles.type}>
           Tipo: {item.type === 'entrata' ? 'Entrata 🟢' : 'Uscita 🔴'}

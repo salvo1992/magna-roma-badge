@@ -1,45 +1,47 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Clock from '../components/Clock';
-import colors from '../assets/colors';
-import QRScanner from '../components/QRScanner';
-import { Button } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import colors from '../assets/colors';
+import AppHeaderLogo from '../components/AppHeaderLogo';
 
-const HomeManager = () => {
+export default function HomeManager() {
+  const navigation = useNavigation<any>();
+
+
   return (
     <View style={styles.container}>
-      <Clock />
-      <Text style={styles.title}>Dashboard Direzione - Magna Roma</Text>
-      <QRScanner />
-      <Button title="Esporta PDF" onPress={() => navigation.navigate('ExportPDF')} />
+      <AppHeaderLogo />
+      <Text style={styles.title}>Dashboard Direzione</Text>
+      <Text style={styles.subtitle}>Benvenuto Direttore</Text>
 
-      <Text style={styles.footer}>sviluppata dal vikingo del web</Text>
+      <Button title="📅 Calendario Presenze" onPress={() => navigation.navigate('Calendar')} color={colors.romaGold} />
+      <Button title="📊 Storico & PDF" onPress={() => navigation.navigate('ExportPDF')} color={colors.romaGold} />
+      <Button title="🧾 Timbrature Giornata" onPress={() => navigation.navigate('History')} color={colors.romaGold} />
+      <Button title="📡 Scanner Tablet" onPress={() => navigation.navigate('ScannerTablet')} color={colors.romaGold} />
+      <Button title="👥 Presenze Live" onPress={() => navigation.navigate('PresenzeLive')} color={colors.romaGold} />
+      <Button title="🔔 Notifiche" onPress={() => navigation.navigate('Notifications')} color={colors.romaGold} />
+      <Button title="⚙️ Impostazioni" onPress={() => navigation.navigate('Settings')} color={colors.romaGold} />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.romaRed,
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
-    justifyContent: 'flex-start',
   },
   title: {
+    fontSize: 26,
     color: colors.romaGold,
-    fontSize: 24,
-    textAlign: 'center',
-    marginVertical: 20,
+    marginBottom: 10,
   },
-  footer: {
-    position: 'absolute',
-    bottom: 10,
-    width: '100%',
-    textAlign: 'center',
-    color: '#ccc',
-    fontSize: 12,
+  subtitle: {
+    fontSize: 18,
+    color: '#fff',
+    marginBottom: 30,
   },
 });
 
-export default HomeManager;

@@ -4,6 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import colors from '../assets/colors';
+import AppHeaderLogo from '../components/AppHeaderLogo';
 
 export default function PresenceDashboardScreen() {
   const [utenti, setUtenti] = useState([]);
@@ -28,6 +29,7 @@ export default function PresenceDashboardScreen() {
 
   return (
     <View style={styles.container}>
+      <AppHeaderLogo />
       <Text style={styles.title}>Presenze attuali</Text>
       {utenti.map(user => (
         <View key={user.id} style={styles.row}>

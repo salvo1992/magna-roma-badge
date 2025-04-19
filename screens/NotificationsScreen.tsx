@@ -1,58 +1,77 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, FlatList } from 'react-native';
-import { collection, addDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert } from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import { sendNotification, listenToNotifications } from '../services/notificationsService';
+import firestore from '@react-native-firebase/firestore';
 import colors from '../assets/colors';
+import AppHeaderLogo from '../components/AppHeaderLogo';
 
 export default function NotificationsScreen() {
+  const { user } = useAuth();
   const [message, setMessage] = useState('');
-  const [notifiche, setNotifiche] = useState([]);
-
-  const inviaNotifica = async () => {
-    if (message.trim().length > 0) {
-      await addDoc(collection(db, 'notifiche'), {
-        testo: message,
-        createdAt: new Date().toISOString()
-      });
-      setMessage('');
-    }
-  };
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    const q = query(collection(db, 'notifiche'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, snapshot => {
-      setNotifiche(snapshot.docs.map(doc => doc.data()));
-    });
-    return unsub;
-  }, []);
+    if (!user?.uid) return;
+    const unsubscribe = listenToNotifications(user.uid, setNotifications);
+    return unsubscribe;
+  }, [user]);
+
+  const invia = async () => {
+    if (user.role !== 'direzione') return;
+    if (!message) return Alert.alert('Messaggio vuoto');
+
+    // Esempio: invio a tutti i dipendenti registrati (semplificato per test)
+    const utentiSnapshot = await firestore().collection('utenti').where('role', '==', 'dipendente').get();
+    const promises = utentiSnapshot.docs.map(doc => sendNotification(doc.id, message));
+    await Promise.all(promises);
+    Alert.alert('Inviato!');
+    setMessage('');
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Notifiche</Text>
-      <TextInput
-        placeholder="Scrivi una notifica"
-        value={message}
-        onChangeText={setMessage}
-        style={styles.input}
-      />
-      <Button title="Invia notifica" onPress={inviaNotifica} />
+      <AppHeaderLogo />
+      {user.role === 'direzione' && (
+        <View>
+          <Text style={styles.title}>Invia Notifica</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Scrivi un messaggio..."
+            value={message}
+            onChangeText={setMessage}
+          />
+          <Button title="Invia" onPress={invia} color={colors.romaGold} />
+        </View>
+      )}
 
+      <Text style={styles.subtitle}>Notifiche Ricevute</Text>
       <FlatList
-        data={notifiche}
-        keyExtractor={(_, index) => index.toString()}
+        data={notifications}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <Text style={styles.msg}>🔔 {item.testo}</Text>
+          <Text style={styles.message}>📣 {item.message}</Text>
         )}
-        style={{ marginTop: 20 }}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.romaRed, padding: 20 },
-  title: { fontSize: 22, color: colors.romaGold, marginBottom: 20 },
-  input: { backgroundColor: '#fff', padding: 10, marginBottom: 10 },
-  msg: { color: '#fff', marginVertical: 5, fontSize: 16 }
+  container: { flex: 1, padding: 20, backgroundColor: colors.romaRed },
+  title: { fontSize: 20, marginBottom: 10, color: colors.romaGold },
+  subtitle: { fontSize: 18, marginTop: 30, marginBottom: 10, color: '#fff' },
+  input: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+  },
+  message: {
+    fontSize: 16,
+    color: '#fff',
+    marginBottom: 5,
+  },
 });
+
 

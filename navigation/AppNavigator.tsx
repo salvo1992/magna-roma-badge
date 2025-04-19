@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
@@ -6,11 +6,16 @@ import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import EmployeeNavigator from './EmployeeNavigator';
 import ManagerNavigator from './ManagerNavigator';
+import { syncTimbratureToFirestore } from '../storage/syncWithFirestore';
 
 const Stack = createNativeStackNavigator();
 
-const AppNavigator = () => {
+const AppNavigator: React.FC = () => {
   const { user } = useAuth();
+
+  useEffect(() => {
+    syncTimbratureToFirestore();
+  }, []);
 
   return (
     <NavigationContainer>
@@ -29,3 +34,5 @@ const AppNavigator = () => {
 };
 
 export default AppNavigator;
+
+

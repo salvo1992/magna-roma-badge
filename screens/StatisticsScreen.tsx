@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Button } from 'react-native';
 import { VictoryBar } from 'victory';
 import { VictoryPie } from 'victory';
-import { getAttendance } from '../storage/attendanceStorage';
 import colors from '../assets/colors';
 import { getTimbratureByPeriodo } from '../services/attendanceService';
+import AppHeaderLogo from '../components/AppHeaderLogo';
 
 export default function StatisticsScreen() {
   const [totalHours, setTotalHours] = useState(0);
@@ -27,11 +27,12 @@ export default function StatisticsScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      <AppHeaderLogo />
       <Text style={styles.title}>Statistiche Settimana</Text>
       <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 20 }}>
-      {['giorno', 'settimana', 'mese'].map(p => (
-       <Button key={p} title={p} onPress={() => setSelectedPeriod( p)} />
-         ))}
+      {(['giorno', 'settimana', 'mese'] as Array<'giorno' | 'settimana' | 'mese'>).map(p => (
+             <Button key={p} title={p} onPress={() => setSelectedPeriod(p)} />
+               ))}
        </View>
       
       <VictoryPie

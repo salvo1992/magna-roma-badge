@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import colors from '../assets/colors';
+import AppHeaderLogo from '../components/AppHeaderLogo';
 
 export default function RegisterScreen() {
   const { register } = useAuth();
@@ -12,6 +13,8 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.container}>
+      <AppHeaderLogo />
+      <Text style={styles.title}>Benvenuto</Text>
       <Text style={styles.title}>Registrazione</Text>
 
       <TextInput style={styles.input} placeholder="Nome completo" onChangeText={setNome} value={nome} />
