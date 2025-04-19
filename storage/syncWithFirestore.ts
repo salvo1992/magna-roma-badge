@@ -1,6 +1,6 @@
-// ✅ syncWithFirestore.ts
 import NetInfo from '@react-native-community/netinfo';
-import firestore from '@react-native-firebase/firestore';
+import { db } from '../firebaseConfig'; // Firebase Web SDK
+import { collection, doc, setDoc, writeBatch } from 'firebase/firestore';
 import { getOfflineTimbrature, clearOfflineTimbrature } from './offlineStorage';
 
 export const syncTimbratureToFirestore = async () => {
@@ -10,18 +10,21 @@ export const syncTimbratureToFirestore = async () => {
   const offline = await getOfflineTimbrature();
   if (offline.length === 0) return;
 
-  const batch = firestore().batch();
+  const batch = writeBatch(db); // db importato da firebaseConfig
+
   offline.forEach((item) => {
-    const ref = firestore().collection('timbrature').doc();
+    const ref = doc(collection(db, 'timbrature'));
     batch.set(ref, item);
   });
 
   try {
     await batch.commit();
     await clearOfflineTimbrature();
-    console.log('Timbrature sincronizzate con Firestore.');
+    console.log('✅ Timbrature sincronizzate con successo.');
   } catch (err) {
-    console.error('Errore durante la sincronizzazione:', err);
+    console.error('❌ Errore durante la sincronizzazione:', err);
   }
 };
+
+
 

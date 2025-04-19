@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { auth } from '../firebaseConfig';
-import { updateEmail, updatePassword } from 'firebase/auth';
-
+import { getAuth, updateEmail, updatePassword } from 'firebase/auth';
 import colors from '../assets/colors';
 import AppHeaderLogo from '../components/AppHeaderLogo';
 import { useLanguage } from '../context/LanguageContext';
@@ -13,7 +11,7 @@ export default function SettingsScreen() {
   const [password, setPassword] = useState('');
   const { language, setLanguage } = useLanguage();
 
-  const user = auth.currentUser;
+  const user = getAuth().currentUser;
 
   const handleChangeEmail = async () => {
     try {
@@ -109,4 +107,3 @@ const styles = StyleSheet.create({
     padding: 10,
   },
 });
-

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { sendNotification, listenToNotifications } from '../services/notificationsService';
-import firestore from '@react-native-firebase/firestore';
 import colors from '../assets/colors';
 import AppHeaderLogo from '../components/AppHeaderLogo';
+import { collection, addDoc, onSnapshot, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 
 export default function NotificationsScreen() {
   const { user } = useAuth();
@@ -13,25 +13,42 @@ export default function NotificationsScreen() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    const unsubscribe = listenToNotifications(user.uid, setNotifications);
-    return unsubscribe;
+
+    const unsubscribe = onSnapshot(
+      collection(db, 'utenti', user.uid, 'notifiche'),
+      (snapshot) => {
+        setNotifications(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      }
+    );
+
+    return () => unsubscribe();
   }, [user]);
 
   const invia = async () => {
     if (user.role !== 'direzione') return;
     if (!message) return Alert.alert('Messaggio vuoto');
 
-    // Esempio: invio a tutti i dipendenti registrati (semplificato per test)
-    const utentiSnapshot = await firestore().collection('utenti').where('role', '==', 'dipendente').get();
-    const promises = utentiSnapshot.docs.map(doc => sendNotification(doc.id, message));
-    await Promise.all(promises);
-    Alert.alert('Inviato!');
-    setMessage('');
+    try {
+      const utentiSnapshot = await getDocs(query(collection(db, 'utenti'), where('role', '==', 'dipendente')));
+      const promises = utentiSnapshot.docs.map(doc =>
+        addDoc(collection(db, 'utenti', doc.id, 'notifiche'), {
+          message,
+          timestamp: new Date(),
+        })
+      );
+
+      await Promise.all(promises);
+      Alert.alert('Inviato!');
+      setMessage('');
+    } catch (error) {
+      Alert.alert('Errore', error.message);
+    }
   };
 
   return (
     <View style={styles.container}>
       <AppHeaderLogo />
+
       {user.role === 'direzione' && (
         <View>
           <Text style={styles.title}>Invia Notifica</Text>
@@ -73,5 +90,4 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
 });
-
 

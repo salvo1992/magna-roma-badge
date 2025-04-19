@@ -1,10 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import i18n from '../services/i18n';
+import I18n from '../services/i18n';
 
-const LanguageContext = createContext({
+interface LanguageContextType {
+  language: string;
+  setLanguage: (lang: string) => void;
+}
+
+const LanguageContext = createContext<LanguageContextType>({
   language: 'it',
-  setLanguage: (lang: string) => {},
+  setLanguage: () => {},
 });
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
@@ -15,7 +20,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       const saved = await AsyncStorage.getItem('lang');
       if (saved) {
         setLang(saved);
-        (i18n as any).locale = saved;
+        I18n.locale = saved;
       }
     };
     loadLang();
@@ -23,7 +28,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
 
   const setLanguage = async (lang: string) => {
     await AsyncStorage.setItem('lang', lang);
-    (i18n as any).locale = lang;
+    I18n.locale = lang;
     setLang(lang);
   };
 

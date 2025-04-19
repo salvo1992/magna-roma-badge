@@ -1,7 +1,10 @@
 import * as Localization from 'expo-localization';
-import i18n from 'i18n-js';
+import * as rawI18n from 'i18n-js';
 
-(i18n as any).translations = {
+// 👉 Dichiariamo come any per evitare errori su proprietà non tipizzate
+const i18n: any = rawI18n;
+
+i18n.translations = {
   it: {
     login: 'Accedi',
     register: 'Registrati',
@@ -69,7 +72,9 @@ import i18n from 'i18n-js';
   },
 };
 
-(i18n as any).locale = Localization.locale.split('-')[0]; // es. 'it'
-(i18n as any).fallbacks = true;
+i18n.locale = Localization.locale.split('-')[0] || 'it';
+i18n.fallbacks = true;
 
 export default i18n;
+
+

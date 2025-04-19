@@ -8,7 +8,19 @@ import EmployeeNavigator from './EmployeeNavigator';
 import ManagerNavigator from './ManagerNavigator';
 import { syncTimbratureToFirestore } from '../storage/syncWithFirestore';
 
-const Stack = createNativeStackNavigator();
+type RootStackParamList = {
+  Login: undefined;
+  Register: undefined;
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+const AuthStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Login" component={LoginScreen} />
+    <Stack.Screen name="Register" component={RegisterScreen} />
+  </Stack.Navigator>
+);
 
 const AppNavigator: React.FC = () => {
   const { user } = useAuth();
@@ -20,10 +32,7 @@ const AppNavigator: React.FC = () => {
   return (
     <NavigationContainer>
       {!user ? (
-        <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-        </Stack.Navigator>
+        <AuthStack />
       ) : user.role === 'dipendente' ? (
         <EmployeeNavigator />
       ) : (
@@ -34,5 +43,6 @@ const AppNavigator: React.FC = () => {
 };
 
 export default AppNavigator;
+
 
 
